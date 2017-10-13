@@ -35,13 +35,13 @@ reg [11:0] ControlValues;
 
 always@(OP) begin
 	casex(OP)
-		R_Type:       	ControlValues= 12'b01_001_00_00_111;
-		I_Type_ADDI:   ControlValues= 12'b00_101_00_00_100;
-		I_Type_ORI:    ControlValues= 12'b00_101_00_00_101;
-		I_Type_LUI:    ControlValues= 12'b10_101_00_00_101;
+		R_Type:       	ControlValues= 12'b0_1_001_00_00_111;
+		I_Type_ADDI:   ControlValues= 12'b0_0_101_00_00_100;
+		I_Type_ORI:    ControlValues= 12'b0_0_101_00_00_101;
+		I_Type_LUI:    ControlValues= 12'b1_0_001_00_00_000;
 		
 		default:
-			ControlValues= 11'b00000000000;
+			ControlValues= 12'b0;
 		endcase
 end	
 	

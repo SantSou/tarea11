@@ -10,6 +10,7 @@
 *		beq
 *		and
 *		nor
+*		lui
 * This processor is written Verilog-HDL. Also, it is synthesizable into hardware.
 * Parameter MEMORY_DEPTH configures the program memory to allocate the program to
 * be execute. If the size of the program changes, thus, MEMORY_DEPTH must change.
@@ -68,7 +69,7 @@ wire [31:0] PC_4_wire;
 wire [31:0] InmmediateExtendAnded_wire;
 wire [31:0] PCtoBranch_wire;
 wire [31:0] LuiWire;		//extended inmediat input
-wire [31:0] luiOutput_wire;	//output from luiMux
+wire [31:0] ALU_or_LUI_wire;	//output from luiMux
 integer ALUStatus;
 
 //******************************************************************/
@@ -116,17 +117,6 @@ PC_Puls_4
 //******************************************************************/
 //******************************************************************/
 //******************************************************************/
-Multiplexer2to1 luiMux(
-	.Selector(Lui_selec),
-	.MUX_Data0(LuiWire),
-	.MUX_Data1(ALUResult_wire),
-	.MUX_Output(luiOutput_wire)
-);
-
-luiModule lui(
-	.DataInput(Instruction_wire[15:0]),
-   .ExtendedOutput(LuiWire)
-);
 
 Multiplexer2to1
 #(
@@ -150,7 +140,7 @@ Register_File
 	.ReadRegister1(Instruction_wire[25:21]),
 	.ReadRegister2(Instruction_wire[20:16]),
 	//.WriteData(ALUResult_wire),
-	.WriteData(luiOutput_wire),
+	.WriteData(ALU_or_LUI_wire),
 	.ReadData1(ReadData1_wire),
 	.ReadData2(ReadData2_wire)
 );
@@ -192,6 +182,22 @@ ArithmeticLogicUnit
 	.B(ReadData2OrInmmediate_wire),
 	.Zero(Zero_wire),
 	.ALUResult(ALUResult_wire)
+);
+
+Multiplexer2to1
+#(
+	.NBits(32)
+)
+luiMux(
+	.Selector(Lui_selec),
+	.MUX_Data0(LuiWire),
+	.MUX_Data1(ALUResult_wire),
+	.MUX_Output(ALU_or_LUI_wire)
+);
+
+luiModule lui(
+	.DataInput(Instruction_wire[15:0]),
+   .ExtendedOutput(LuiWire)
 );
 
 assign ALUResultOut = ALUResult_wire;
