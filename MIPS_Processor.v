@@ -52,6 +52,7 @@ wire ORForBranch;
 wire ALUSrc_wire;
 wire RegWrite_wire;
 wire Zero_wire;
+wire Lui_selec;
 wire [2:0] ALUOp_wire;
 wire [3:0] ALUOperation_wire;
 wire [4:0] WriteRegister_wire;
@@ -66,6 +67,8 @@ wire [31:0] ALUResult_wire;
 wire [31:0] PC_4_wire;
 wire [31:0] InmmediateExtendAnded_wire;
 wire [31:0] PCtoBranch_wire;
+wire [31:0] LuiWire;		//extended inmediat input
+wire [31:0] luiOutput_wire;	//output from luiMux
 integer ALUStatus;
 
 //******************************************************************/
@@ -78,6 +81,7 @@ ControlUnit
 	.BranchEQ(BranchEQ_wire),
 	.ALUOp(ALUOp_wire),
 	.ALUSrc(ALUSrc_wire),
+	.lui(Lui_selec),
 	.RegWrite(RegWrite_wire)
 );
 
@@ -107,12 +111,23 @@ PC_Puls_4
 	.Result(PC_4_wire)
 );
 
+//******************************************************************/
+//******************************************************************/
+//******************************************************************/
+//******************************************************************/
+//******************************************************************/
+Multiplexer2to1 luiMux(
+	.Selector(Lui_selec),
+	.MUX_Data0(LuiWire),
+	.MUX_Data1(ALUResult_wire),
+	.MUX_Output(luiOutput_wire)
+);
 
-//******************************************************************/
-//******************************************************************/
-//******************************************************************/
-//******************************************************************/
-//******************************************************************/
+luiModule lui(
+	.DataInput(Instruction_wire[15:0]),
+   .ExtendedOutput(LuiWire)
+);
+
 Multiplexer2to1
 #(
 	.NBits(5)
@@ -123,7 +138,6 @@ MUX_ForRTypeAndIType
 	.MUX_Data0(Instruction_wire[20:16]),
 	.MUX_Data1(Instruction_wire[15:11]),
 	.MUX_Output(WriteRegister_wire)
-
 );
 
 RegisterFile
@@ -135,7 +149,8 @@ Register_File
 	.WriteRegister(WriteRegister_wire),
 	.ReadRegister1(Instruction_wire[25:21]),
 	.ReadRegister2(Instruction_wire[20:16]),
-	.WriteData(ALUResult_wire),
+	//.WriteData(ALUResult_wire),
+	.WriteData(luiOutput_wire),
 	.ReadData1(ReadData1_wire),
 	.ReadData2(ReadData2_wire)
 );
